@@ -28,14 +28,16 @@ do_fetch() {
           forceupdate=true
         fi
         if ! $forceupdate && [ -e ~/.cache/zig/p/$hash ]; then
-          echo ">>> Found $url in cache, ignored"
+          echo ">>> Found in cache, ignored"
           continue
         fi
-        wget $url
+        if ! wget -c --show-progress --quiet $url; then
+            echo ">>> Failed!"
+            exit -1
+        fi
         tarfile=${url##*/}
         hash=`zig fetch --debug-hash $tarfile | tail -n 1`
-        echo ">> hash of $d:"
-        echo -e "\t$hash"
+        echo ">>> Installed, hash: $hash"
         rm $tarfile
         if [ -e ~/.cache/zig/p/$hash/build.zig.zon ]; then
             do_fetch ~/.cache/zig/p/$hash/build.zig.zon
