@@ -8,6 +8,12 @@ if [ "$1" = "-f" ]; then
     shift
 fi
 
+keepfiles=false
+if [ "$1" = "-k" ]; then
+    keepfiles=true
+    shift
+fi
+
 do_fetch() {
     for d in `grep -o 'url *=.*' $1 | cut -d = -f 2`; do
         d=`echo $d | grep -o 'https://[^"]*'`
@@ -38,7 +44,9 @@ do_fetch() {
         tarfile=${url##*/}
         hash=`zig fetch --debug-hash $tarfile | tail -n 1`
         echo ">>> Installed, hash: $hash"
-        rm $tarfile
+        if ! $keepfiles; then
+            rm $tarfile
+        fi
         if [ -e ~/.cache/zig/p/$hash/build.zig.zon ]; then
             do_fetch ~/.cache/zig/p/$hash/build.zig.zon
         fi
