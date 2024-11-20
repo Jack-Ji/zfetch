@@ -14,6 +14,8 @@ if [ "$1" = "-k" ]; then
     shift
 fi
 
+cachedir=`zig env | grep global_cache_dir | awk -F \" '{print $(NF-1)}'`
+
 do_fetch() {
     for d in `grep -o 'url *=.*' $1 | cut -d = -f 2`; do
         d=`echo $d | grep -o 'https://[^"]*'`
@@ -33,7 +35,7 @@ do_fetch() {
         if [ -z "$hash" ]; then
           forceupdate=true
         fi
-        if ! $forceupdate && [ -e ~/.cache/zig/p/$hash ]; then
+        if ! $forceupdate && [ -e $cachedir/p/$hash ]; then
           echo ">>> Found in cache, ignored"
           continue
         fi
@@ -47,8 +49,8 @@ do_fetch() {
         if ! $keepfiles; then
             rm $tarfile
         fi
-        if [ -e ~/.cache/zig/p/$hash/build.zig.zon ]; then
-            do_fetch ~/.cache/zig/p/$hash/build.zig.zon
+        if [ -e $cachedir/p/$hash/build.zig.zon ]; then
+            do_fetch $cachedir/p/$hash/build.zig.zon
         fi
     done
 
