@@ -17,8 +17,8 @@ fi
 cachedir=`zig env | grep global_cache_dir | awk -F \" '{print $(NF-1)}'`
 
 do_fetch() {
-    for d in `grep -o 'url *=.*' $1 | cut -d = -f 2`; do
-        d=`echo $d | grep -o 'https://[^"]*'`
+    for d in `grep -o 'url *=.*' $1 | awk -F \" '{print $2}'`; do
+        d=`echo $d | grep -o 'https://[^"]*' | sed 's/\?.*#/#/'`
         echo -e "\n>>> Deal with $d"
         if echo $d | grep -q '\.tar\.gz$'; then
             url=$d
@@ -39,11 +39,11 @@ do_fetch() {
           echo ">>> Found in cache, ignored"
           continue
         fi
-        if ! wget -c --show-progress --quiet $url; then
+        tarfile=${url##*/}
+        if ! wget -c --show-progress --quiet $url -O $tarfile; then
             echo ">>> Failed!"
             exit -1
         fi
-        tarfile=${url##*/}
         hash=`zig fetch --debug-hash $tarfile | tail -n 1`
         echo ">>> Installed, hash: $hash"
         if ! $keepfiles; then
