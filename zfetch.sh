@@ -17,10 +17,10 @@ fi
 cachedir=`zig env | grep global_cache_dir | awk -F \" '{print $(NF-1)}'`
 
 do_fetch() {
-    for d in `grep -o 'url *=.*' $1 | awk -F \" '{print $2}'`; do
+    for d in `grep -o '^[[:space:]]*.url *=.*' $1 | awk -F \" '{print $2}'`; do
         d=`echo $d | grep -o 'https://[^"]*' | sed 's/\?.*#/#/'`
         echo -e "\n>>> Deal with $d"
-        if echo $d | grep -q '\.tar\.gz$'; then
+        if echo $d | grep -q '\.tar\.gz\|\.zip$'; then
             url=$d
         elif echo $d | grep -q '#[.0-9a-z]*$'; then
             url_base=`echo $d | awk -F \# '{print $1}'`
